@@ -43,11 +43,11 @@ function Home() {
 
   return (
     <>
-      <Container fluid className='px-4 mt-4 bg-black'>
+      <Container fluid className='px-4 mt-4  bg-black'>
         <Row className='g-4' xs={1} sm={2} md={3} lg={6}>
           {items.map(item => (
-            <Col key={item.id} className="d-flex">
-              <Card style={{flex: '1 1 auto', border: '1px solid lightgray'}}>
+            <Col key={item.id} className="d-flex pb-5">
+              <Card className="d-flex  flex-column " style={{flex: '1 1 auto', border: '1px solid lightgray'}}>
                 <OverlayTrigger
                   placement="top"
                   overlay={<Tooltip>{item.name}</Tooltip>}
@@ -74,16 +74,16 @@ function Home() {
           ))}
         </Row>
       </Container>
-      <Modal show={showModal} onHide={()=>setShowModal(false)} style={{maxWidth: '1000px'}}>
+      <Modal show={showModal} onHide={()=>setShowModal(false)} style={{maxWidth: '1200px', width: '100%'}}>
         <Modal.Header closeButton style={{border: 'none', backgroundColor: 'white'}}>
           <Modal.Title style={{display: 'flex', justifyContent: 'center', color: 'black'}}>{selectedItem && selectedItem.name}</Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{backgroundColor: 'white'}}>
+        <Modal.Body style={{backgroundColor: 'white',width: '100%'}}>
           <Image src={selectedItem && selectedItem.image} style={{width: '80%', height: '100px', display: 'block', margin: '0 auto'}} />
           <Row className="g-0 mt-4">
             <Col xs={12} className="d-flex flex-column">
               <ListGroup variant="flush">
-                {selectedItem && Object.entries(selectedItem).map(([key, value]) => (
+                {selectedItem && Object.entries(selectedItem).filter(([key]) => key !== 'image').map(([key, value]) => (
                   <ListGroup.Item key={key} style={{borderBottom: '1px solid lightgray'}}>
                     <b>{key}:</b> {value}
                   </ListGroup.Item>

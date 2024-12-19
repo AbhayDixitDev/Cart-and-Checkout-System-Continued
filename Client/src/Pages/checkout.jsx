@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Form, Spinner } from 'react-bootstrap';
 import { FaCreditCard, FaLock } from 'react-icons/fa';
 import { clearCart } from '../reduxSlices/cartSlice';
 import { useDispatch } from 'react-redux';
-import Spinner from 'react-bootstrap/Spinner';
 import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
   const dispatch = useDispatch();
-  const Navigate = useNavigate();
+  const navigate = useNavigate();
   const cart = useSelector((state) => state.cart.data);
-  const user = JSON.parse(localStorage.getItem('user'));
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [amount, setAmount] = useState(0);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const stripe = useStripe();
   const elements = useElements();
@@ -33,56 +30,20 @@ const Checkout = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError(null);
-    setSuccess(null);
     setLoading(true);
-
-    const cardElement = elements.getElement(CardElement);
+    setError(null);
 
     try {
-      const { data } = await axios.post('http://localhost:5000/orders', {
+      const { data } = await axios.post('http://localhost:5000/orders/checkout', {
         cart,
         amount,
         name,
         email
       });
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(
-        data.clientSecret,
-        {
-          payment_method: {
-            card: cardElement,
-          },
-        }
-      );
-
-      if (error) {
-        setError(`Payment error: ${error.message}`);
-      } else {
-        setSuccess(`Payment successful! PaymentIntent ID: ${paymentIntent.id}`);
-        setSuccess(
-            <div className="alert alert-success" role="alert">
-              <h4 className="alert-heading">Successful Transaction</h4>
-              <p>
-                Name: {name} <br />
-                Email: {email} <br />
-                Total: ${amount} <br />
-                Payment Type: Online Using Stripe
-              </p>
-            </div>
-          );
-        setTimeout(() => {
-          setSuccess(
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,1)', zIndex: 9999 }}>
-              <h1 className="display-1 text-success text-center" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>Thank you for shopping with us!</h1>
-              <h3>You will be redirected to the home page in 3,2,1</h3>
-            </div>
-          );
-        }, 5000);
-        setTimeout(() => {
-          Navigate('/');
-        }, 8000);
-      }
+      // Redirect to Stripe Checkout
+      console.log(data.url);
+      window.location.href = data.url; // Use the URL returned from the backend
     } catch (error) {
       console.log(error.response);
       setError(
@@ -92,75 +53,46 @@ const Checkout = () => {
       );
     } finally {
       setLoading(false);
+      // Clear the cart
+      dispatch(clearCart());
     }
-
-    // Clear the cart
-    dispatch(clearCart());
-    
   };
 
   return (
-    <Container fluid className="pt-4 bg-black"  style={{ height: '90vh' }}>
+    <Container fluid className="bg-black" style={{ height: '90vh', paddingTop: '6rem' }}>
       <Row className="justify-content-md-center">
-        <Col md="6">
-          <Card style={{ backgroundColor: success ? 'transparent' : '#fff' }}>
-            <Card.Header>
-              <h3 className="text-center">Payment Gateway</h3>
+        <Col style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Card className="bg-dark" style={{  borderRadius: '20px', width: '500px' }}>
+            <Card.Header className="bg-dark">
+              <h3 className="text-center text-light">Payment Gateway</h3>
             </Card.Header>
-            <Card.Body className="p-4">
-              <Form onSubmit={handleSubmit} className="m-4">
+            <Card.Body className="p-1 bg-dark">
+              <Form onSubmit={handleSubmit} className="m-1">
                 <Form.Group controlId="formBasicName" className="mb-3">
-                  <Form.Label>Name</Form.Label>
+                  <Form.Label className="text-light">Name</Form.Label>
                   <Form.Control
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    className="bg-dark text-light"
                   />
                 </Form.Group>
                 <Form.Group controlId="formBasicEmail" className="mb-3">
-                  <Form.Label>Email</Form.Label>
+                  <Form.Label className="text-light">Email</Form.Label>
                   <Form.Control
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="bg-dark text-light"
                   />
                 </Form.Group>
-                <Form.Group controlId="formBasicAmount" className="mb-3">
-                  <Form.Label>Total Amount</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={`$${amount.toFixed(2)}`}
-                    readOnly
-                  />
-                </Form.Group>
-                <CardElement 
-                  className="mb-3 p-2 border rounded"
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: '1rem',
-                        color: '#495057',
-                        backgroundColor: '#fff',
-                        '::placeholder': {
-                          color: '#aab7c4',
-                        },
-                      },
-                      invalid: {
-                        color: '#dc3545',
-                        ':focus': {
-                          borderColor: '#dc3545',
-                        },
-                      },
-                    },
-                  }}
-                />
                 <Button
                   variant="primary"
                   type="submit"
                   disabled={!stripe || loading}
-                  className="d-flex align-items-center"
+                  className="d-flex align-items-center bg-success text-light w-100"
                 >
                   {loading ? (
                     <>
@@ -169,16 +101,15 @@ const Checkout = () => {
                     </>
                   ) : (
                     <>
-                      <FaCreditCard className="me-2 border rounded-pill" /> Pay
+                      <FaCreditCard className="me-2 border rounded-pill text-light" /> Checkout
                     </>
                   )}
                 </Button>
-                {error && <div className="text-danger mt-3">{error}</div>}
-                {success && <div className="text-success mt-3">{success}</div>}
+                {error && <div className="text-danger mt-3 text-light">{error}</div>}
               </Form>
             </Card.Body>
-            <Card.Footer className="text-center">
-              <FaLock /> Secure payment
+            <Card.Footer className="text-center bg-dark">
+              <FaLock className="text-light" /> Secure payment
             </Card.Footer>
           </Card>
         </Col>

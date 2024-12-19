@@ -8,6 +8,8 @@ import Cart from "./Pages/cart"
 import Checkout from "./Pages/checkout"
 import Login from "./Pages/Login"
 import Register from "./Pages/Register"
+import Success from "./Pages/Success"
+import Failed from "./Pages/Failed"
 
 const App=()=> {
   const user = localStorage.getItem("user")
@@ -25,6 +27,8 @@ const App=()=> {
           <Route path="/mobile" element={user ? <Mobile /> : <Navigate to="/login" />} />
           <Route path="/cart" element={user ? <Cart /> : <Navigate to="/login" />} />
           <Route path="/checkout" element={user ? <Checkout /> : <Navigate to="/login" />} />
+          <Route path="/success"  element={!user ? <Navigate to="/" /> : <div><Success/></div>} />
+          <Route path="/failed"  element={!user ? <Navigate to="/" /> : <div><Failed/></div>} />
         </Route>
         <Route path="/login" element={ user  ? <Navigate to="/" /> : <Login />} />
         <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />

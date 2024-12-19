@@ -8,9 +8,14 @@ const Header = () => {
   const cartData = useSelector((state) => state.cart.data);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
-    window.location.reload();
+    const confirmLogout = window.confirm(
+      "Are you sure you want to logout?"
+    );
+    if (confirmLogout) {
+      localStorage.removeItem("user");
+      navigate("/login");
+      window.location.reload();
+    }
   };
 
   return (

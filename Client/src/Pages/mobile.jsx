@@ -82,11 +82,11 @@ const Mobile=()=> {
                     <Row className="g-0 mt-4">
                         <Col xs={12} className="d-flex flex-column">
                             <ListGroup variant="flush">
-                                {selectedItem && Object.entries(selectedItem).map(([key, value]) => (
-                                    <ListGroup.Item key={key} style={{borderBottom: '1px solid lightgray'}}>
-                                        <b>{key}:</b> {value}
-                                    </ListGroup.Item>
-                                ))}
+                            {selectedItem && Object.entries(selectedItem).filter(([key]) => key !== 'image').map(([key, value]) => (
+                  <ListGroup.Item key={key} style={{borderBottom: '1px solid lightgray'}}>
+                    <b>{key}:</b> {value}
+                  </ListGroup.Item>
+                ))}
                             </ListGroup>
                         </Col>
                     </Row>
